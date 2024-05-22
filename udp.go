@@ -7,11 +7,10 @@ import (
 )
 
 func init() {
-	//caddyhttp.RegisterNetworkHTTP3("socket-activation", "socket-activation-udp")
-	//caddy.RegisterNetwork("socket-activation-udp", listenUDP)
+	caddyhttp.RegisterNetworkHTTP3("socket-activation", "socket-activation-udp")
+	caddy.RegisterNetwork("socket-activation-udp", listenUDP)
 }
 
-// not used for now
 func listenUDP(ctx context.Context, network, addr string, cfg net.ListenConfig) (any, error) {
 	files := Files(true)
 	if len(files) == 0 {
