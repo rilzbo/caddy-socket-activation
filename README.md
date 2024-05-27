@@ -7,8 +7,8 @@ Useful in deployments where sockets are passed by systemd.
 #### Caddy Configuration
 
 ```Caddyfile
-https:// {
-    bind socket-activation/https
+localhost:443 {
+    bind socket-activation/localhost
     respond "ok"
 }
 ```
@@ -20,7 +20,7 @@ Using socket activation requires every site block to have explicit **bind**, it 
 #### Commandline
 
 ```bash
-systemd-socket-activate -l 443 --fdname=http3 /path/to/caddy run
+systemd-socket-activate -l 443 --fdname=localhost systemd-socket-activate --datagram -l 443 --fdname=localhost:localhost_UDP caddy run
 ```
 
 ### Credits

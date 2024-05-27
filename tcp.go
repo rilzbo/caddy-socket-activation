@@ -3,9 +3,11 @@ package caddy_socket_activation
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 
 	"github.com/caddyserver/caddy/v2"
+	"go.uber.org/zap"
 )
 
 func init() {
@@ -13,6 +15,8 @@ func init() {
 }
 
 func listenTCP(ctx context.Context, network, addr string, cfg net.ListenConfig) (any, error) {
+	caddy.Log().Debug("Listen", zap.String("addr", addr))
+
 	files := Files(true)
 	if len(files) == 0 {
 		return nil, errors.New("no file descriptors passed")
@@ -32,5 +36,5 @@ func listenTCP(ctx context.Context, network, addr string, cfg net.ListenConfig) 
 			}
 		}
 	}
-	return nil, errors.New("no matching file descriptor found")
+	return nil, fmt.Errorf("no matching file descriptor found for %q", host)
 }

@@ -22,12 +22,16 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/caddyserver/caddy/v2"
+	"go.uber.org/zap"
 )
 
 const (
-	// listenFdsStart corresponds to `SD_LISTEN_FDS_START`.
-	listenFdsStart = 3
+	SD_LISTEN_FDS_START = 3
 )
+
+var files []*os.File
 
 // Files returns a slice containing a `os.File` object for each
 // file descriptor passed to this process via systemd fd-passing protocol.
@@ -42,6 +46,15 @@ func Files(unsetEnv bool) []*os.File {
 		defer os.Unsetenv("LISTEN_FDNAMES")
 	}
 
+	if files != nil {
+		return files
+	}
+
+	caddy.Log().Debug("Socket Activation",
+		zap.String("LISTEN_PID", os.Getenv("LISTEN_PID")),
+		zap.String("LISTEN_FDS", os.Getenv("LISTEN_FDS")),
+		zap.String("LISTEN_FDNAMES", os.Getenv("LISTEN_FDNAMES")))
+
 	pid, err := strconv.Atoi(os.Getenv("LISTEN_PID"))
 	if err != nil || pid != os.Getpid() {
 		return nil
@@ -54,11 +67,12 @@ func Files(unsetEnv bool) []*os.File {
 
 	names := strings.Split(os.Getenv("LISTEN_FDNAMES"), ":")
 
-	files := make([]*os.File, 0, nfds)
-	for fd := listenFdsStart; fd < listenFdsStart+nfds; fd++ {
+	files = make([]*os.File, 0, nfds)
+
+	for fd := SD_LISTEN_FDS_START; fd < SD_LISTEN_FDS_START+nfds; fd++ {
 		syscall.CloseOnExec(fd)
 		name := "LISTEN_FD_" + strconv.Itoa(fd)
-		offset := fd - listenFdsStart
+		offset := fd - SD_LISTEN_FDS_START
 		if offset < len(names) && len(names[offset]) > 0 {
 			name = names[offset]
 		}
