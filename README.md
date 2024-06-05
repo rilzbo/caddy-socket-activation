@@ -1,4 +1,4 @@
-## Socket Activation for Caddy (WIP)
+## Socket Activation for Caddy
 
 Useful in deployments where sockets are passed by systemd.
 
@@ -8,7 +8,7 @@ Useful in deployments where sockets are passed by systemd.
 
 ```Caddyfile
 localhost:443 {
-    bind socket-activation/localhost
+    bind socket-activation/https
     respond "ok"
 }
 ```
@@ -20,9 +20,5 @@ Using socket activation requires every site block to have explicit **bind**, it 
 #### Commandline
 
 ```bash
-systemd-socket-activate -l 443 --fdname=localhost systemd-socket-activate --datagram -l 443 --fdname=localhost:localhost_UDP caddy run
+systemd-socket-activate -l 443 --fdname=https systemd-socket-activate --datagram -l 443 --fdname=https:https caddy run
 ```
-
-### Credits
-
-FD to sockets mapping comes from [go-systemd](https://github.com/coreos/go-systemd/).
